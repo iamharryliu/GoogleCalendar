@@ -1,15 +1,29 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import pytz
 
 # Now and start of week.
 now = datetime.utcnow()
+today = date.today()
 days_into_the_week = timedelta(now.weekday())
-start_of_week = (now - days_into_the_week).isoformat() + "Z"  # 'Z' indicates UTC time
+monday_of_this_week = today - days_into_the_week
+monday_of_this_week = datetime.combine(monday_of_this_week, datetime.min.time()).isoformat() + 'Z'
+
+# monday_of_this_week = monday_of_this_week.isoformat() + "Z"  # 'Z' indicates UTC time
 
 # One week from now time aware.
 seven_days = timedelta(days=7)
 one_week_from_now = now + seven_days
 one_week_from_now = one_week_from_now.replace(tzinfo=pytz.utc)
+
+def startOfWeekX(week):
+    start = today - timedelta(days=now.weekday()) + timedelta(weeks=week-1)
+    start = datetime.combine(start, datetime.min.time()).replace(tzinfo=pytz.utc)
+    return start
+
+def endOfWeekX(week):
+    start = startOfWeekX(week)
+    end = start + seven_days
+    return end
 
 hexcode_to_color_dict = {
     "#a4bdfc": "LAVENDER",
@@ -45,5 +59,5 @@ class Task:
         return time
 
     def __repr__(self):
-        return f"{self.name}: {self.color}"
+        return f"{self.name} / {self.color} / {self.start} / {self.end} / {self.total_time}"
 

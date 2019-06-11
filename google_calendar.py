@@ -13,7 +13,7 @@ from config import (
     ACTIVITY_COLORS,
     HEXCODE_TO_COLOR_DICT,
 )
-from utils import start_of_week, one_week_from_now, Task
+from utils import monday_of_this_week, one_week_from_now, Task, startOfWeekX, endOfWeekX
 
 import dateutil.parser
 import pytz
@@ -25,7 +25,6 @@ class calendarAPI:
         self.events = self.getEvents()
         self.colors = self.service.colors().get(fields="event").execute()
         self.tasks = self.getTasks()
-        self.data = self.getActivityTime()
 
     # Credentials
 
@@ -79,7 +78,7 @@ class calendarAPI:
             self.service.events()
             .list(
                 calendarId="primary",
-                timeMin=start_of_week,
+                timeMin=monday_of_this_week,
                 maxResults=NUMBER_OF_FUTURE_EVENTS,
                 singleEvents=True,
                 orderBy="startTime",
@@ -103,24 +102,68 @@ class calendarAPI:
         for event in self.events:
             start = self.getEventTime(event, "start")
             end = self.getEventTime(event, "end")
-            event_less_than_one_week_from_now = end < one_week_from_now
-            if event_less_than_one_week_from_now:
-                name = event["summary"]
-                try:
-                    color_hexcode = self.colors["event"][event["colorId"]]["background"]
-                    color = self.getColorName(color_hexcode)
-                except Exception as e:
-                    color = "LAVENDAR"
-                task = Task(name, color, start, end)
+            name = event["summary"]
+            try:
+                color_hexcode = self.colors["event"][event["colorId"]]["background"]
+                color = self.getColorName(color_hexcode)
+            except Exception as e:
+                color = "LAVENDAR"
+            task = Task(name, color, start, end)
+            tasks.append(task)
+        return tasks
+    
+
+    def getTasksForNext7Days(self):
+        tasks = []
+        for task in self.tasks:
+            task_less_than_one_week_from_now = task.end < one_week_from_now
+            if task_less_than_one_week_from_now:
                 tasks.append(task)
         return tasks
+
+    def getTasksForWeekX(self, week):
+        tasks = []
+        start = startOfWeekX(week)
+        end = endOfWeekX(week)
+        for task in self.tasks:
+            tasks_in_week_X = start <= task.start and task.start <= end
+            if tasks_in_week_X:
+                tasks.append(task)
+        return tasks
+
+            
+
 
     def getColorName(self, hexcode):
         """ hex code color -> name of color """
         if hexcode in HEXCODE_TO_COLOR_DICT:
             return HEXCODE_TO_COLOR_DICT[hexcode]
 
-    def getActivityTime(self):
+
+    def getPieChartDataForNext7Days(self):
+        tasks = self.getTasksForNext7Days()
+        activity_time = self.getActivityTimeOfTasks(tasks)
+        data = [["activity", "time spent"]]
+        for activity, time in activity_time.items():
+            activity_time = [activity, time]
+            data.append(activity_time)
+        return data
+        
+    def getActivityTimeOfTasks(self, tasks):
+        activity_time = dict()
+        for color, activity in ACTIVITY_COLORS.items():
+            if activity != '':
+                activity_time[activity] = 0
+            for task in tasks:
+                if task.color == color:
+                    if activity in activity_time:
+                        activity_time[activity] += task.total_time
+                    else:
+                        activity_time[activity] = task.total_time
+        return activity_time
+
+
+    def getActivityTimeXWeeksFromNow(self, x):
         activity_time = dict()
         for color, activity in ACTIVITY_COLORS.items():
             for task in self.tasks:
@@ -131,16 +174,18 @@ class calendarAPI:
                         activity_time[activity] = task.total_time
         return activity_time
 
-    def getTotalTimeOfTasks(self):
-        total_time = 0
-        for task in self.tasks:
-            total_time += task.total_time
-        return total_time
 
-    def getActivityPieChartData(self):
-        activity_time = self.getActivityTime()
-        data = [["activity", "time spent"]]
-        for activity, time in activity_time.items():
-            activity_time = [activity, time]
-            data.append(activity_time)
+    def getColumnChartDataForNext4Weeks(self):
+        data = []
+        legend=['Week']
+        for week in range(1,5):
+            tasks = self.getTasksForWeekX(week)
+            week = [str(week)]
+            activity_time = self.getActivityTimeOfTasks(tasks)
+            for activity, time in activity_time.items():
+                if activity not in legend:
+                    legend.append(activity)
+                week.append(time)
+            data.append(week)
+        data.insert(0, legend)
         return data

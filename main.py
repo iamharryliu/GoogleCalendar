@@ -3,8 +3,7 @@ from google_calendar import calendarAPI
 
 def main():
     calendar_api = calendarAPI()
-    print(calendar_api.getActivityPieChartData())
-
+    calendar_api.getColumnChartDataForNext4Weeks()
 
 if __name__ == "__main__":
     main()
