@@ -1,12 +1,10 @@
-from utils.output import printTasks
-from utils.tasks import getActivityData
+from google_calendar import calendarAPI
 
 
 def main():
-    # printTasks()
-    activity_data = getActivityData()
-    print(activity_data)
+    calendar_api = calendarAPI()
+    print(calendar_api.getActivityPieChartData())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
