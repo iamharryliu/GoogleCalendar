@@ -7,13 +7,16 @@ from google.auth.transport.requests import Request
 from os import path
 import pickle
 
-from config import (
-    NUMBER_OF_FUTURE_EVENTS,
-    SCOPES,
-    ACTIVITY_COLORS,
+from config import NUMBER_OF_FUTURE_EVENTS, SCOPES, ACTIVITY_COLORS
+from utils import (
     HEXCODE_TO_COLOR_DICT,
+    monday_of_this_week,
+    today,
+    one_week_from_today,
+    Task,
+    getStartOfWeekX,
+    getEndOfWeekX,
 )
-from utils import monday_of_this_week, one_week_from_now, Task, startOfWeekX, endOfWeekX
 
 import dateutil.parser
 import pytz
@@ -41,7 +44,7 @@ class calendarAPI:
         )
         if (
             credentialsExpiredAndRefreshTokenAvailable
-        ):  # Ifthere are valid credentials, try refresh.
+        ):  # If there are valid credentials, try refresh.
             self.refreshCredentials(credentials)
         else:  # If there are no (valid) credentials available, let the user log in.
             flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
@@ -111,34 +114,33 @@ class calendarAPI:
             task = Task(name, color, start, end)
             tasks.append(task)
         return tasks
-    
 
     def getTasksForNext7Days(self):
         tasks = []
         for task in self.tasks:
-            task_less_than_one_week_from_now = task.end < one_week_from_now
-            if task_less_than_one_week_from_now:
+            task_less_than_one_week_from_today = (
+                today <= task.start and task.end <= one_week_from_today
+            )
+            if task_less_than_one_week_from_today:
                 tasks.append(task)
         return tasks
 
     def getTasksForWeekX(self, week):
         tasks = []
-        start = startOfWeekX(week)
-        end = endOfWeekX(week)
+        start = getStartOfWeekX(week)
+        end = getEndOfWeekX(week)
         for task in self.tasks:
-            tasks_in_week_X = start <= task.start and task.start <= end
+            tasks_in_week_X = start <= task.start and task.end <= end
             if tasks_in_week_X:
                 tasks.append(task)
         return tasks
-
-            
-
 
     def getColorName(self, hexcode):
         """ hex code color -> name of color """
         if hexcode in HEXCODE_TO_COLOR_DICT:
             return HEXCODE_TO_COLOR_DICT[hexcode]
 
+    # Data
 
     def getPieChartDataForNext7Days(self):
         tasks = self.getTasksForNext7Days()
@@ -148,37 +150,11 @@ class calendarAPI:
             activity_time = [activity, time]
             data.append(activity_time)
         return data
-        
-    def getActivityTimeOfTasks(self, tasks):
-        activity_time = dict()
-        for color, activity in ACTIVITY_COLORS.items():
-            if activity != '':
-                activity_time[activity] = 0
-            for task in tasks:
-                if task.color == color:
-                    if activity in activity_time:
-                        activity_time[activity] += task.total_time
-                    else:
-                        activity_time[activity] = task.total_time
-        return activity_time
 
-
-    def getActivityTimeXWeeksFromNow(self, x):
-        activity_time = dict()
-        for color, activity in ACTIVITY_COLORS.items():
-            for task in self.tasks:
-                if task.color == color:
-                    if activity in activity_time:
-                        activity_time[activity] += task.total_time
-                    else:
-                        activity_time[activity] = task.total_time
-        return activity_time
-
-
-    def getColumnChartDataForNext4Weeks(self):
+    def getColumnChartDataForNextXWeeks(self, x_weeks):
         data = []
-        legend=['Week']
-        for week in range(1,5):
+        legend = ["Week"]
+        for week in range(1, x_weeks + 1):
             tasks = self.getTasksForWeekX(week)
             week = [str(week)]
             activity_time = self.getActivityTimeOfTasks(tasks)
@@ -189,3 +165,16 @@ class calendarAPI:
             data.append(week)
         data.insert(0, legend)
         return data
+
+    def getActivityTimeOfTasks(self, tasks):
+        activity_time = dict()
+        for color, activity in ACTIVITY_COLORS.items():
+            if activity != "":
+                activity_time[activity] = 0
+            for task in tasks:
+                if task.color == color:
+                    if activity in activity_time:
+                        activity_time[activity] += task.total_time
+                    else:
+                        activity_time[activity] = task.total_time
+        return activity_time

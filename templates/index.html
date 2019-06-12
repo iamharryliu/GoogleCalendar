@@ -1,6 +1,14 @@
 {% extends 'layout.html' %}
 {% block content %}
 <h1>Google Calendar API</h1>
-{% include 'pie_chart.html' %}
-{% include 'column_chart.html' %}
+<div class='row'>
+    <div class='col-lg-6'>
+        <h5>How you're spending the next 7 days.</h5>
+        {% include 'pie_chart.html' %}
+    </div>
+    <div class='col-lg-6'>
+        <h5>How you're spending the next 3 weeks.</h5>
+        {% include 'column_chart.html' %}
+    </div>
+</div>
 {% endblock %}

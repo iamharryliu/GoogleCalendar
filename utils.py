@@ -1,43 +1,38 @@
+""" Time """
+
 from datetime import datetime, timedelta, date
 import pytz
+
+START_OF_DAY = 5  # I wake up at 5am everyday or atleast try.
 
 # Now and start of week.
 now = datetime.utcnow()
 today = date.today()
-days_into_the_week = timedelta(now.weekday())
+today = datetime.combine(today, datetime.min.time()).replace(tzinfo=pytz.utc)
+today = today + timedelta(hours=START_OF_DAY)
+days_into_the_week = timedelta(today.weekday())
 monday_of_this_week = today - days_into_the_week
-monday_of_this_week = datetime.combine(monday_of_this_week, datetime.min.time()).isoformat() + 'Z'
-
-# monday_of_this_week = monday_of_this_week.isoformat() + "Z"  # 'Z' indicates UTC time
+monday_of_this_week = (
+    datetime.combine(monday_of_this_week, datetime.min.time()).isoformat() + "Z"
+)  # 'Z' indicates UTC time
 
 # One week from now time aware.
 seven_days = timedelta(days=7)
-one_week_from_now = now + seven_days
-one_week_from_now = one_week_from_now.replace(tzinfo=pytz.utc)
+one_week_from_today = today + seven_days
 
-def startOfWeekX(week):
-    start = today - timedelta(days=now.weekday()) + timedelta(weeks=week-1)
-    start = datetime.combine(start, datetime.min.time()).replace(tzinfo=pytz.utc)
+
+def getStartOfWeekX(week):
+    start = today - timedelta(days=today.weekday()) + timedelta(weeks=week - 1)
     return start
 
-def endOfWeekX(week):
-    start = startOfWeekX(week)
+
+def getEndOfWeekX(week):
+    start = getStartOfWeekX(week)
     end = start + seven_days
     return end
 
-hexcode_to_color_dict = {
-    "#a4bdfc": "LAVENDER",
-    "#5484ed": "BLUEBERRY",
-    "#46d6db": "PEACOCK",
-    "#7ae7bf": "SAGE",
-    "#51b749": "BASIL",
-    "#ffb878": "TANGERINE",
-    "#fbd75b": "BANANA",
-    "#ff887c": "FLAMINGO",
-    "#dc2127": "TOMATO",
-    "#dbadff": "GRAPE",
-    "#e1e1e1": "GRAPHITE",
-}
+
+""" Task """
 
 
 class Task:
@@ -61,3 +56,17 @@ class Task:
     def __repr__(self):
         return f"{self.name} / {self.color} / {self.start} / {self.end} / {self.total_time}"
 
+
+HEXCODE_TO_COLOR_DICT = {
+    "#a4bdfc": "LAVENDER",
+    "#5484ed": "BLUEBERRY",
+    "#46d6db": "PEACOCK",
+    "#7ae7bf": "SAGE",
+    "#51b749": "BASIL",
+    "#ffb878": "TANGERINE",
+    "#fbd75b": "BANANA",
+    "#ff887c": "FLAMINGO",
+    "#dc2127": "TOMATO",
+    "#dbadff": "GRAPE",
+    "#e1e1e1": "GRAPHITE",
+}

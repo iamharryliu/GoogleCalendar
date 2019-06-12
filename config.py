@@ -1,20 +1,9 @@
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
-HEXCODE_TO_COLOR_DICT = {
-    "#a4bdfc": "LAVENDER",
-    "#5484ed": "BLUEBERRY",
-    "#46d6db": "PEACOCK",
-    "#7ae7bf": "SAGE",
-    "#51b749": "BASIL",
-    "#ffb878": "TANGERINE",
-    "#fbd75b": "BANANA",
-    "#ff887c": "FLAMINGO",
-    "#dc2127": "TOMATO",
-    "#dbadff": "GRAPE",
-    "#e1e1e1": "GRAPHITE",
-}
+START_OF_DAY = 5 # I wake up at 5am everyday or atleast try.
 
+NUMBER_OF_FUTURE_EVENTS = 300
 
 ACTIVITY_COLORS = {
     "LAVENDER": "Sleep",
@@ -30,5 +19,4 @@ ACTIVITY_COLORS = {
     "GRAPHITE": "Routine",
 }
 
-NUMBER_OF_FUTURE_EVENTS = 300
 
