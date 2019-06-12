@@ -1,5 +1,4 @@
 # google-calendar
-# google-calendar
 Google Calendar App to view how you're planning to spend your time over the next week and several weeks. Can't manage what you can't track!
 
 ## Screenshots
