@@ -1,9 +1,7 @@
 """ Time """
-
+from config import START_OF_DAY
 from datetime import datetime, timedelta, date
 import pytz
-
-START_OF_DAY = 5  # I wake up at 5am everyday or atleast try.
 
 # Now and start of week.
 now = datetime.utcnow()
@@ -16,7 +14,7 @@ monday_of_this_week = (
     datetime.combine(monday_of_this_week, datetime.min.time()).isoformat() + "Z"
 )  # 'Z' indicates UTC time
 
-# One week from now time aware.
+# One week from now.
 seven_days = timedelta(days=7)
 one_week_from_today = today + seven_days
 
@@ -50,7 +48,7 @@ class Task:
             return 0
         time = self.end - self.start
         time = time.total_seconds()  # datetime -> seconds
-        time = time / 60 / 60  # seconds -> hours
+        time = time / 3600  # seconds -> hours
         return time
 
     def __repr__(self):
