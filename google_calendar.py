@@ -130,8 +130,8 @@ class calendarAPI:
         start = getStartOfWeekX(week)
         end = getEndOfWeekX(week)
         for task in self.tasks:
-            tasks_in_week_X = start <= task.start and task.end <= end
-            if tasks_in_week_X:
+            task_in_week_X = start <= task.start and task.end <= end
+            if task_in_week_X:
                 tasks.append(task)
         return tasks
 
