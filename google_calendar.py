@@ -10,9 +10,9 @@ import pickle
 from config import NUMBER_OF_FUTURE_EVENTS, SCOPES, ACTIVITY_COLORS
 from utils import (
     HEXCODE_TO_COLOR_DICT,
-    monday_of_this_week,
-    today,
-    one_week_from_today,
+    get_monday_of_this_week,
+    get_today,
+    get_one_week_from_today,
     Task,
     getStartOfWeekX,
     getEndOfWeekX,
@@ -81,7 +81,7 @@ class calendarAPI:
             self.service.events()
             .list(
                 calendarId="primary",
-                timeMin=monday_of_this_week,
+                timeMin=get_monday_of_this_week(),
                 maxResults=NUMBER_OF_FUTURE_EVENTS,
                 singleEvents=True,
                 orderBy="startTime",
@@ -119,7 +119,7 @@ class calendarAPI:
         tasks = []
         for task in self.tasks:
             task_less_than_one_week_from_today = (
-                today <= task.start and task.end <= one_week_from_today
+                get_today() <= task.start and task.end <= get_one_week_from_today()
             )
             if task_less_than_one_week_from_today:
                 tasks.append(task)

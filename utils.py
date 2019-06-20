@@ -3,23 +3,34 @@ from config import START_OF_DAY
 from datetime import datetime, timedelta, date
 import pytz
 
-# Now and start of week.
-now = datetime.utcnow()
-today = date.today()
-today = datetime.combine(today, datetime.min.time()).replace(tzinfo=pytz.utc)
-today = today + timedelta(hours=START_OF_DAY)
-days_into_the_week = timedelta(today.weekday())
-monday_of_this_week = today - days_into_the_week
-monday_of_this_week = (
-    datetime.combine(monday_of_this_week, datetime.min.time()).isoformat() + "Z"
-)  # 'Z' indicates UTC time
-
-# One week from now.
 seven_days = timedelta(days=7)
-one_week_from_today = today + seven_days
+
+
+def get_today():
+    today = date.today()
+    today = datetime.combine(today, datetime.min.time()).replace(tzinfo=pytz.utc)
+    today = today + timedelta(hours=START_OF_DAY)
+    return today
+
+
+def get_one_week_from_today():
+    today = get_today()
+    one_week_from_today = today + seven_days
+    return one_week_from_today
+
+
+def get_monday_of_this_week():
+    today = get_today()
+    days_into_the_week = timedelta(today.weekday())
+    monday_of_this_week = today - days_into_the_week
+    monday_of_this_week = (
+        datetime.combine(monday_of_this_week, datetime.min.time()).isoformat() + "Z"
+    )  # 'Z' indicates UTC time
+    return monday_of_this_week
 
 
 def getStartOfWeekX(week):
+    today = get_today()
     start = today - timedelta(days=today.weekday()) + timedelta(weeks=week - 1)
     return start
 
