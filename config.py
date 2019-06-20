@@ -1,10 +1,9 @@
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
-START_OF_DAY = 5 # I wake up at 5am everyday or atleast try.
+START_OF_DAY = 5  # I wake up at 5am everyday or atleast try.
 
-NUMBER_OF_FUTURE_EVENTS = 300
-
+# Configure colors to match your Google Calendar color activities.
 ACTIVITY_COLORS = {
     "LAVENDER": "Sleep",
     "BLUEBERRY": "Learning",
@@ -19,4 +18,4 @@ ACTIVITY_COLORS = {
     "GRAPHITE": "Routine",
 }
 
-
+NUMBER_OF_FUTURE_EVENTS = 300
