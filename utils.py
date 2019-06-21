@@ -1,9 +1,9 @@
 """ Time """
+
+
 from config import START_OF_DAY
 from datetime import datetime, timedelta, date
 import pytz
-
-seven_days = timedelta(days=7)
 
 
 def get_today():
@@ -15,7 +15,7 @@ def get_today():
 
 def get_one_week_from_today():
     today = get_today()
-    one_week_from_today = today + seven_days
+    one_week_from_today = today + timedelta(days=7)
     return one_week_from_today
 
 
@@ -37,7 +37,7 @@ def getStartOfWeekX(week):
 
 def getEndOfWeekX(week):
     start = getStartOfWeekX(week)
-    end = start + seven_days
+    end = start + timedelta(days=7)
     return end
 
 
@@ -55,8 +55,8 @@ class Task:
         self.total_time = self.get_total_time()
 
     def get_total_time(self):
-        if self.start == 0 or self.end == 0:
-            return 0
+        # if self.start == 0 or self.end == 0:
+        #     return 0
         time = self.end - self.start
         time = time.total_seconds()  # datetime -> seconds
         time = time / 3600  # seconds -> hours

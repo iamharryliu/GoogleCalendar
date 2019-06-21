@@ -140,11 +140,24 @@ class calendarAPI:
         if hexcode in HEXCODE_TO_COLOR_DICT:
             return HEXCODE_TO_COLOR_DICT[hexcode]
 
+    def getActivityTimeForTasks(self, tasks):
+        activity_time = dict()
+        for color, activity in ACTIVITY_COLORS.items():
+            if activity != "":
+                activity_time[activity] = 0
+            for task in tasks:
+                if task.color == color:
+                    if activity in activity_time:
+                        activity_time[activity] += task.total_time
+                    else:
+                        activity_time[activity] = task.total_time
+        return activity_time
+
     # Data
 
     def getPieChartDataForNext7Days(self):
         tasks = self.getTasksForNext7Days()
-        activity_time = self.getActivityTimeOfTasks(tasks)
+        activity_time = self.getActivityTimeForTasks(tasks)
         data = [["activity", "time spent"]]
         for activity, time in activity_time.items():
             activity_time = [activity, time]
@@ -157,7 +170,7 @@ class calendarAPI:
         for week in range(1, x_weeks + 1):
             tasks = self.getTasksForWeekX(week)
             week = [str(week)]
-            activity_time = self.getActivityTimeOfTasks(tasks)
+            activity_time = self.getActivityTimeForTasks(tasks)
             for activity, time in activity_time.items():
                 if activity not in legend:
                     legend.append(activity)
@@ -165,16 +178,3 @@ class calendarAPI:
             data.append(week)
         data.insert(0, legend)
         return data
-
-    def getActivityTimeOfTasks(self, tasks):
-        activity_time = dict()
-        for color, activity in ACTIVITY_COLORS.items():
-            if activity != "":
-                activity_time[activity] = 0
-            for task in tasks:
-                if task.color == color:
-                    if activity in activity_time:
-                        activity_time[activity] += task.total_time
-                    else:
-                        activity_time[activity] = task.total_time
-        return activity_time
