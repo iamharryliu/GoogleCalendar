@@ -7,6 +7,9 @@ from google.auth.transport.requests import Request
 from os import path
 import pickle
 
+import dateutil.parser
+import pytz
+
 from config import NUMBER_OF_FUTURE_EVENTS, SCOPES, ACTIVITY_COLORS
 from utils import (
     HEXCODE_TO_COLOR_DICT,
@@ -18,38 +21,35 @@ from utils import (
     getEndOfWeekX,
 )
 
-import dateutil.parser
-import pytz
-
 
 class calendarAPI:
     def __init__(self):
-        self.service = self.getService()
-        self.events = self.getEvents()
-        self.colors = self.service.colors().get(fields="event").execute()
         self.tasks = self.getTasks()
+
+    # Service
+
+    def getService(self):
+        credentials = self.getCredentials()
+        if not credentials.valid:
+            self.resolveCredentials(credentials)
+        service = build("calendar", "v3", credentials=credentials)
+        return service
 
     # Credentials
 
     def getCredentials(self):
-        if path.exists("token.pickle"):
-            with open("token.pickle", "rb") as token:
-                credentials = pickle.load(token)
-            return credentials
-        return None
+        with open("token.pickle", "rb") as token:
+            credentials = pickle.load(token)
+        return credentials
 
-    def attemptToResolveCredentials(self, credentials):
-        credentialsExpiredAndRefreshTokenAvailable = (
-            credentials and credentials.expired and credentials.refresh_token
-        )
-        if (
-            credentialsExpiredAndRefreshTokenAvailable
-        ):  # If there are valid credentials, try refresh.
+    def resolveCredentials(self, credentials):
+        try:
             self.refreshCredentials(credentials)
-        else:  # If there are no (valid) credentials available, let the user log in.
+        except:
             flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
             credentials = flow.run_local_server()
-        self.saveCredentials(credentials)
+        finally:
+            self.saveCredentials(credentials)
 
     def refreshCredentials(self, credentials):
         credentials.refresh(Request())
@@ -58,27 +58,11 @@ class calendarAPI:
         with open("token.pickle", "wb") as token:
             pickle.dump(credentials, token)
 
-    # Service
-
-    def getService(self):
-        """ get google calender api service"""
-        credentials = self.getCredentials()
-        credentials_not_valid = not credentials or not credentials.valid
-        if credentials_not_valid:
-            self.attemptToResolveCredentials(credentials)
-        service = build("calendar", "v3", credentials=credentials)
-        return service
-
     # Events
 
-    def getEvents(self):
-        events_result = self.getEventsResult()
-        events = events_result.get("items", [])
-        return events
-
-    def getEventsResult(self):
+    def getEventsFromService(self, service):
         events_result = (
-            self.service.events()
+            service.events()
             .list(
                 calendarId="primary",
                 timeMin=get_monday_of_this_week(),
@@ -88,7 +72,8 @@ class calendarAPI:
             )
             .execute()
         )
-        return events_result
+        events = events_result.get("items", [])
+        return events
 
     def getEventTime(self, event, time):
         """ get event time (start/end) and convert to datetime, timezone aware object """
@@ -96,20 +81,40 @@ class calendarAPI:
         event_time = dateutil.parser.parse(event_time).replace(tzinfo=pytz.utc)
         return event_time
 
+    def getEventStartTime(self, event):
+        time = event["start"].get("dateTime", event["start"].get("date"))
+        time = self.addTimezone(time)
+        return time
+
+    def getEventEndTime(self, event):
+        time = event["end"].get("dateTime", event["end"].get("date"))
+        time = self.addTimezone(time)
+        return time
+
+    def addTimezone(self, time):
+        time = dateutil.parser.parse(time).replace(tzinfo=pytz.utc)
+        return time
+
     # Tasks
 
     def getTasks(self):
+        service = self.getService()
+        tasks = self.getTasksFromService(service)
+        return tasks
+
+    def getTasksFromService(self, service):
         tasks = []
-        if not self.events:
-            return tasks
-        for event in self.events:
-            start = self.getEventTime(event, "start")
-            end = self.getEventTime(event, "end")
+        events = self.getEventsFromService(service)
+        colors = service.colors().get(fields="event").execute()
+        for event in events:
             name = event["summary"]
+            start = self.getEventStartTime(event)
+            end = self.getEventEndTime(event)
             try:
-                color_hexcode = self.colors["event"][event["colorId"]]["background"]
+                color_hexcode = colors["event"][event["colorId"]]["background"]
                 color = self.getColorName(color_hexcode)
-            except Exception as e:
+            except:
+                print(f"{name} uses other color")
                 color = "LAVENDAR"
             task = Task(name, color, start, end)
             tasks.append(task)
