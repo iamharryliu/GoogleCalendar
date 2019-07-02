@@ -12,7 +12,8 @@ These instructions will get you a copy of the project up and running on your loc
 * pip3
 
 ### Setup and Installation
-You first need to go to [go get your Google Calendar API credentials](https://developers.google.com/calendar/quickstart/python) and press the "ENABLE THE GOOGLE CALENDAR API". You will get a pop-uo for your credentials that you will need to download and move to the project root folder google-calendar. After your can copy and paste the following.
+You first need to go to [go get your Google Calendar API credentials](https://developers.google.com/calendar/quickstart/python) and press the "ENABLE THE GOOGLE CALENDAR API" button. You will get a pop-up for your credentials that you will need to download and move the credentials.json file to the project root folder google-calendar. After your can copy and paste the following.
+
 ```
 git clone https://github.com/itzliu/google-calendar.git      # Clone repository.
 cd google-calendar
@@ -21,6 +22,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 python run.py
 ```
+
+Follow the on screen Chrome instructions to validate your API.
 
 ## Built With
 * Flask Framework
