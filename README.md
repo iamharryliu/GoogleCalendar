@@ -4,10 +4,7 @@ Google Calendar App to view how you're planning to spend your time over the next
 ## Screenshots
 ![Screenshot](screenshot.png)
 
-## Getting Started
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
-### Prerequisites
+### Requirements
 * Python3.6+
 * pip3
 
@@ -29,14 +26,3 @@ Follow the on screen Chrome instructions to validate your API.
 * Flask Framework
 * Google Calendar API
 * Google Charts API
-
-## What I Learned
-* How to use Google Calendar API.
-* How to create charts using Google Charts API.
-* How to use Python datetime objects.
-
-## Authors
-* Harry Liu
-
-## Acknowledgements
-* [https://github.com/KalleHallden/Calendar_Automator](https://github.com/KalleHallden/Calendar_Automator)

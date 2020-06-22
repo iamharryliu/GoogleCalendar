@@ -1,7 +1,3 @@
-""" Time """
-
-
-from config import START_OF_DAY
 from datetime import datetime, timedelta, date
 import pytz
 
@@ -9,7 +5,6 @@ import pytz
 def get_today():
     today = date.today()
     today = datetime.combine(today, datetime.min.time()).replace(tzinfo=pytz.utc)
-    today = today + timedelta(hours=START_OF_DAY)
     return today
 
 
@@ -47,8 +42,7 @@ def getEndOfWeekX(week):
 class Task:
     total_time = 0
 
-    def __init__(self, name, color, start=0, end=0):
-        self.name = name
+    def __init__(self, color, start=0, end=0):
         self.start = start
         self.end = end
         self.color = color
@@ -63,19 +57,33 @@ class Task:
         return time
 
     def __repr__(self):
-        return f"{self.name} / {self.color} / {self.start} / {self.end} / {self.total_time}"
+        return f"{self.color} / {self.start} / {self.end} / {self.total_time}"
 
 
 HEXCODE_TO_COLOR_DICT = {
     "#a4bdfc": "LAVENDER",
-    "#5484ed": "BLUEBERRY",
-    "#46d6db": "PEACOCK",
     "#7ae7bf": "SAGE",
-    "#51b749": "BASIL",
-    "#ffb878": "TANGERINE",
-    "#fbd75b": "BANANA",
-    "#ff887c": "FLAMINGO",
-    "#dc2127": "TOMATO",
     "#dbadff": "GRAPE",
+    "#ff887c": "FLAMINGO",
+    "#fbd75b": "BANANA",
+    "#ffb878": "TANGERINE",
+    "#46d6db": "PEACOCK",
     "#e1e1e1": "GRAPHITE",
+    "#5484ed": "BLUEBERRY",
+    "#51b749": "BASIL",
+    "#dc2127": "TOMATO",
+}
+
+COLOR_ID_TO_COLOR_DICT = {
+    "1": "LAVENDER",
+    "2": "SAGE",
+    "3": "GRAPE",
+    "4": "FLAMINGO",
+    "5": "BANANA",
+    "6": "TANGERINE",
+    "7": "PEACOCK",
+    "8": "GRAPHITE",
+    "9": "BLUEBERRY",
+    "10": "BASIL",
+    "11": "TOMATO",
 }

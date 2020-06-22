@@ -1,18 +1,11 @@
-# Google API
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-
-# Token Pickle
 from os import path
-import pickle
-
-import dateutil.parser
-import pytz
-
+import pickle, dateutil.parser, pytz
 from config import NUMBER_OF_FUTURE_EVENTS, SCOPES, ACTIVITY_COLORS
 from utils import (
-    HEXCODE_TO_COLOR_DICT,
+    COLOR_ID_TO_COLOR_DICT,
     get_monday_of_this_week,
     get_today,
     get_one_week_from_today,
@@ -22,47 +15,57 @@ from utils import (
 )
 
 
-class calendarAPI:
+class calendar_api:
     def __init__(self):
-        self.tasks = self.getTasks()
+        self.credentials = self.get_api_credentials()
+        self.service = self.get_google_api_service()
+        self.tasks = self.get_tasks_from_service()
 
-    # Service
-
-    def getService(self):
-        credentials = self.getCredentials()
-        if not credentials.valid:
-            self.resolveCredentials(credentials)
-        service = build("calendar", "v3", credentials=credentials)
-        return service
-
-    # Credentials
-
-    def getCredentials(self):
+    def get_api_credentials(self):
         with open("token.pickle", "rb") as token:
             credentials = pickle.load(token)
-        return credentials
+        if credentials and credentials.valid:
+            return credentials
+        else:
+            return self.resolve_credentials(credentials)
 
-    def resolveCredentials(self, credentials):
+    def resolve_credentials(self, credentials):
         try:
-            self.refreshCredentials(credentials)
+            credentials.refresh(Request())
         except:
             flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
             credentials = flow.run_local_server()
         finally:
-            self.saveCredentials(credentials)
+            self.save_credentials(credentials)
+            return credentials
 
-    def refreshCredentials(self, credentials):
-        credentials.refresh(Request())
-
-    def saveCredentials(self, credentials):
+    def save_credentials(self, credentials):
         with open("token.pickle", "wb") as token:
             pickle.dump(credentials, token)
 
-    # Events
+    def get_google_api_service(self):
+        return build("calendar", "v3", credentials=self.credentials)
 
-    def getEventsFromService(self, service):
+    def get_tasks_from_service(self):
+        tasks = []
+        events = self.get_events_from_service()
+        # colors = self.service.colors().get(fields="event").execute()
+        for event in events:
+            start = self.get_event_start_time(event)
+            end = self.get_event_end_time(event)
+            if "colorId" in event:
+                # color_hexcode = colors["event"][event["colorId"]]["background"]
+                color_id = event["colorId"]
+                color = COLOR_ID_TO_COLOR_DICT[color_id]
+            else:
+                color = "GRAPHITE"
+            task = Task(color, start, end)
+            tasks.append(task)
+        return tasks
+
+    def get_events_from_service(self):
         events_result = (
-            service.events()
+            self.service.events()
             .list(
                 calendarId="primary",
                 timeMin=get_monday_of_this_week(),
@@ -75,59 +78,28 @@ class calendarAPI:
         events = events_result.get("items", [])
         return events
 
-    def getEventTime(self, event, time):
-        """ get event time (start/end) and convert to datetime, timezone aware object """
-        event_time = event[time].get("dateTime", event[time].get("date"))
-        event_time = dateutil.parser.parse(event_time).replace(tzinfo=pytz.utc)
-        return event_time
-
-    def getEventStartTime(self, event):
+    def get_event_start_time(self, event):
         time = event["start"].get("dateTime", event["start"].get("date"))
-        time = self.addTimezone(time)
-        return time
+        return self.get_time_with_timezone(time)
 
-    def getEventEndTime(self, event):
+    def get_event_end_time(self, event):
         time = event["end"].get("dateTime", event["end"].get("date"))
-        time = self.addTimezone(time)
-        return time
+        return self.get_time_with_timezone(time)
 
-    def addTimezone(self, time):
-        time = dateutil.parser.parse(time).replace(tzinfo=pytz.utc)
-        return time
+    def get_time_with_timezone(self, time):
+        return dateutil.parser.parse(time).replace(tzinfo=pytz.utc)
 
     # Tasks
 
-    def getTasks(self):
-        service = self.getService()
-        tasks = self.getTasksFromService(service)
-        return tasks
-
-    def getTasksFromService(self, service):
-        tasks = []
-        events = self.getEventsFromService(service)
-        colors = service.colors().get(fields="event").execute()
-        for event in events:
-            name = event["summary"]
-            start = self.getEventStartTime(event)
-            end = self.getEventEndTime(event)
-            try:
-                color_hexcode = colors["event"][event["colorId"]]["background"]
-                color = self.getColorName(color_hexcode)
-            except:
-                print(f"{name} uses other color")
-                color = "LAVENDAR"
-            task = Task(name, color, start, end)
-            tasks.append(task)
-        return tasks
-
     def getTasksForNext7Days(self):
         tasks = []
+        today = get_today()
+        next_week = get_one_week_from_today()
         for task in self.tasks:
-            task_less_than_one_week_from_today = (
-                get_today() <= task.start and task.end <= get_one_week_from_today()
-            )
-            if task_less_than_one_week_from_today:
+            if today <= task.start and task.start < next_week:
                 tasks.append(task)
+
+        get_one_week_from_today()
         return tasks
 
     def getTasksForWeekX(self, week):
@@ -135,15 +107,10 @@ class calendarAPI:
         start = getStartOfWeekX(week)
         end = getEndOfWeekX(week)
         for task in self.tasks:
-            task_in_week_X = start <= task.start and task.end <= end
+            task_in_week_X = start <= task.start and task.start <= end
             if task_in_week_X:
                 tasks.append(task)
         return tasks
-
-    def getColorName(self, hexcode):
-        """ hex code color -> name of color """
-        if hexcode in HEXCODE_TO_COLOR_DICT:
-            return HEXCODE_TO_COLOR_DICT[hexcode]
 
     def getActivityTimeForTasks(self, tasks):
         activity_time = dict()
