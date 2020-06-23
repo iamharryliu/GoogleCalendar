@@ -12,7 +12,7 @@ Application to visualize your Google Calendar data.
 
 macOS / Linux Command Line
 ```
-git clone https://github.com/itzliu/google-calendar.git      # Clone repository.
+git clone https://github.com/itzliu/google-calendar.git
 cd google-calendar
 python -m venv venv
 source venv/bin/activate
@@ -22,7 +22,7 @@ python run.py
 
 Windows Command Line
 ```
-git clone https://github.com/itzliu/google-calendar.git      # Clone repository.
+git clone https://github.com/itzliu/google-calendar.git.
 cd google-calendar
 python -m venv venv
 source venv/Scripts/activate
