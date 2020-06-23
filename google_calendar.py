@@ -89,17 +89,13 @@ class calendar_api:
     def get_time_with_timezone(self, time):
         return dateutil.parser.parse(time).replace(tzinfo=pytz.utc)
 
-    # Tasks
-
-    def getTasksForNext7Days(self):
+    def get_tasks_for_this_week(self):
         tasks = []
-        today = get_today()
-        next_week = get_one_week_from_today()
+        start_of_week = getStartOfWeekX(1)
+        start_of_next_week = getStartOfWeekX(2)
         for task in self.tasks:
-            if today <= task.start and task.start < next_week:
+            if start_of_week <= task.start and task.start < start_of_next_week:
                 tasks.append(task)
-
-        get_one_week_from_today()
         return tasks
 
     def getTasksForWeekX(self, week):
@@ -112,10 +108,10 @@ class calendar_api:
                 tasks.append(task)
         return tasks
 
-    def getActivityTimeForTasks(self, tasks):
+    def get_activity_time_for_tasks(self, tasks):
         activity_time = dict()
         for color, activity in ACTIVITY_COLORS.items():
-            if activity != "":
+            if activity:
                 activity_time[activity] = 0
             for task in tasks:
                 if task.color == color:
@@ -125,11 +121,9 @@ class calendar_api:
                         activity_time[activity] = task.total_time
         return activity_time
 
-    # Data
-
-    def getPieChartDataForNext7Days(self):
-        tasks = self.getTasksForNext7Days()
-        activity_time = self.getActivityTimeForTasks(tasks)
+    def get_pie_chart_data_for_week(self):
+        tasks = self.get_tasks_for_this_week()
+        activity_time = self.get_activity_time_for_tasks(tasks)
         data = [["activity", "time spent"]]
         for activity, time in activity_time.items():
             activity_time = [activity, time]
@@ -142,7 +136,7 @@ class calendar_api:
         for week in range(1, x_weeks + 1):
             tasks = self.getTasksForWeekX(week)
             week = [str(week)]
-            activity_time = self.getActivityTimeForTasks(tasks)
+            activity_time = self.get_activity_time_for_tasks(tasks)
             for activity, time in activity_time.items():
                 if activity not in legend:
                     legend.append(activity)

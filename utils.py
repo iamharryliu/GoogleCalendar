@@ -36,9 +36,6 @@ def getEndOfWeekX(week):
     return end
 
 
-""" Task """
-
-
 class Task:
     total_time = 0
 

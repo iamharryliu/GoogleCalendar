@@ -11,7 +11,7 @@ app.config["SECRET_KEY"] = "5791628bb0b13ce0c676dfde280ba245"
 def index():
     if os.path.isfile("./credentials.json"):
         yourcalendar = calendar_api()
-        pie_chart = yourcalendar.getPieChartDataForNext7Days()
+        pie_chart = yourcalendar.get_pie_chart_data_for_week()
         column_chart = yourcalendar.getColumnChartDataForNextXWeeks(4)
         return render_template(
             "index.html", pie_chart=pie_chart, column_chart=column_chart
