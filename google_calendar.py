@@ -9,7 +9,6 @@ from utils import (
     get_monday_of_this_week,
     get_today,
     get_tomorrow,
-    get_one_week_from_today,
     Task,
     getStartOfWeekX,
     getEndOfWeekX,
@@ -105,19 +104,13 @@ class calendar_api:
     def get_tasks_between_start_and_end(self, start, end):
         tasks = []
         for task in self.tasks:
-            if start <= task.start and task.start < end:
+            if start <= task.start < end:
                 tasks.append(task)
         return tasks
 
     def get_tasks_for_week_x(self, week):
-        tasks = []
-        start = getStartOfWeekX(week)
-        end = getEndOfWeekX(week)
-        for task in self.tasks:
-            task_in_week_X = start <= task.start and task.start <= end
-            if task_in_week_X:
-                tasks.append(task)
-        return tasks
+        start, end = getStartOfWeekX(week), getEndOfWeekX(week)
+        return self.get_tasks_between_start_and_end(start, end)
 
     def get_activity_time_for_tasks(self, tasks):
         activity_time = dict()

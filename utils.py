@@ -4,57 +4,54 @@ import pytz
 
 def get_today():
     today = date.today()
-    today = datetime.combine(today, datetime.min.time()).replace(tzinfo=pytz.utc)
-    return today
+    return datetime.combine(today, datetime.min.time()).replace(tzinfo=pytz.utc)
 
 def get_tomorrow():
-    today = get_today()
-    return today + timedelta(days=1)
+    return get_today() + timedelta(days=1)
 
 
-def get_one_week_from_today():
+def get_one_week_from_dt(dt):
+    return dt + timedelta(days=7)
+
+
+def get_monday_this_week_dt():
     today = get_today()
-    return today + timedelta(days=7)
+    return today - timedelta(today.weekday())
 
 
 def get_monday_of_this_week():
-    today = get_today()
-    days_into_the_week = timedelta(today.weekday())
-    monday_of_this_week = today - days_into_the_week
+    monday_dt = get_monday_this_week_dt()
     monday_of_this_week = (
-        datetime.combine(monday_of_this_week, datetime.min.time()).isoformat() + "Z"
+        datetime.combine(monday_dt, datetime.min.time()).isoformat() + "Z"
     )  # 'Z' indicates UTC time
     return monday_of_this_week
 
 
 def getStartOfWeekX(week):
     today = get_today()
-    start = today - timedelta(days=today.weekday()) + timedelta(weeks=week - 1)
-    return start
+    return today - timedelta(days=today.weekday()) + timedelta(weeks=week - 1)
 
 
 def getEndOfWeekX(week):
-    start = getStartOfWeekX(week)
-    end = start + timedelta(days=7)
-    return end
+    return getStartOfWeekX(week) + timedelta(days=7)
 
 
 class Task:
-    total_time = 0
 
     def __init__(self, color, start=0, end=0):
         self.start = start
         self.end = end
         self.color = color
-        self.total_time = self.get_total_time()
+
+    @property
+    def total_time(self):
+        return self.get_total_time()
 
     def get_total_time(self):
-        # if self.start == 0 or self.end == 0:
-        #     return 0
-        time = self.end - self.start
-        time = time.total_seconds()  # datetime -> seconds
-        time = time / 3600  # seconds -> hours
-        return time
+        time_difference = self.end - self.start
+        seconds = time_difference.total_seconds()
+        hours = seconds / 3600
+        return hours
 
     def __repr__(self):
         return f"{self.color} / {self.start} / {self.end} / {self.total_time}"
