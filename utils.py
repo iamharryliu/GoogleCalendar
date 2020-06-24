@@ -7,11 +7,14 @@ def get_today():
     today = datetime.combine(today, datetime.min.time()).replace(tzinfo=pytz.utc)
     return today
 
+def get_tomorrow():
+    today = get_today()
+    return today + timedelta(days=1)
+
 
 def get_one_week_from_today():
     today = get_today()
-    one_week_from_today = today + timedelta(days=7)
-    return one_week_from_today
+    return today + timedelta(days=7)
 
 
 def get_monday_of_this_week():

@@ -5,15 +5,16 @@ SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 ACTIVITY_COLORS = {
     "LAVENDER": "Sleep",
     "BLUEBERRY": "",
-    "PEACOCK": "Evening Routine",
-    "SAGE": "Morning Routine",
-    "BASIL": "Weekend Routine",
+    "PEACOCK": "",
+    "SAGE": "Routine",
+    "BASIL": "",
     "TANGERINE": "",
     "BANANA": "",
     "FLAMINGO": "",
     "TOMATO": "",
     "GRAPE": "Work",
-    "GRAPHITE": "Other",
+    "GRAPHITE": "",
+    "OTHER": "Other"
 }
 
 NUMBER_OF_FUTURE_EVENTS = 1000

@@ -11,10 +11,11 @@ app.config["SECRET_KEY"] = "5791628bb0b13ce0c676dfde280ba245"
 def index():
     if os.path.isfile("./credentials.json"):
         yourcalendar = calendar_api()
-        pie_chart = yourcalendar.get_pie_chart_data_for_week()
-        column_chart = yourcalendar.getColumnChartDataForNextXWeeks(4)
+        day_data = yourcalendar.get_pie_chart_data_for_day()
+        week_data = yourcalendar.get_pie_chart_data_for_week()
+        column_chart = yourcalendar.get_column_chart_data_for_next_x_weeks(4)
         return render_template(
-            "index.html", pie_chart=pie_chart, column_chart=column_chart
+            "index.html", day_data=day_data, week_data=week_data, column_chart=column_chart
         )
     else:
         return redirect(url_for("credential_form"))

@@ -4,16 +4,17 @@
 
     function drawPieChart() {
 
-        var data = google.visualization.arrayToDataTable({{ pie_chart | safe}});
+        var data = google.visualization.arrayToDataTable({{ pie_chart_data | safe }});
 
     var options = {
-        title: 'Activities',
-        pieHole: 0.4,
+        title: '{{chart_name}}',
+        pieHole: 0.1,
     };
 
-    var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+    var chart = new google.visualization.PieChart(document.getElementById('piechart{{chart_name}}'));
 
     chart.draw(data, options);
+
     }
 
     $(window).resize(function () {
@@ -22,4 +23,4 @@
 
 </script>
 
-<div id="piechart" style="height: 500px;"></div>
+<div id="piechart{{chart_name}}" style="height: 500px;"></div>
